@@ -1,0 +1,2 @@
+# .prettierignore
+prisma/schema.prisma

@@ -1,0 +1,434 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  admin
+  systemAdmin
+  user
+}
+
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum ProjectStatus {
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+enum ProjectRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum NotificationType {
+  TASK_ASSIGNED
+  TASK_UPDATED
+  TASK_COMPLETED
+
+  PROJECT_INVITED
+  PROJECT_ROLE_CHANGED
+  PROJECT_MEMBER_REMOVE
+
+
+  WORKSPACE_INVITED
+  WORKSPACE_ROLE_CHANGED
+
+  CHAT_MESSAGE
+
+  MEETING_STARTED
+  MEETING_INVITED
+  MEETING_ENDED
+   MEETING_CANCELD
+
+  COMMENT_ADDED
+
+  SYSTEM
+}
+
+enum ActivityAction {
+  CREATE
+  UPDATE
+  DELETE
+  ASSIGN
+  UNASSIGN
+  INVITE
+  REMOVE
+  ARCHIVE
+  RESTORE
+  UPLOAD
+  DOWNLOAD
+  COMMENT
+  LOGIN
+  LOGOUT
+  CANCEL
+}
+
+enum ActivityTargetType {
+  WORKSPACE
+  PROJECT
+  TASK
+  COMMENT
+  FILE
+  CHAT
+  MEETING
+  USER
+}
+
+enum MeetingStatus {
+  SCHEDULED
+  LIVE
+  COMPLETED
+  CANCELLED
+}
+enum ConversationType {
+  DIRECT
+  GROUP
+}
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  username      String    @unique
+  passwordHash  String
+  role          Role      @default(user)
+  fullName      String
+  profileImage  String?
+  projectsOwned Project[] @relation("ProjectOwner")
+  createdTasks  Task[]    @relation("TaskCreator")
+
+  assignedTasks Task[] @relation("TaskAssignee")
+
+  ownedWorkspaces      Workspace[]       @relation("WorkspaceOwner")
+  notification         Notification[]
+  activity             Activity[]
+  comment              Comment[]
+  workspaceMemberships WorkspaceMember[]
+
+  projectMemberships   ProjectMember[]
+  uploadedFiles        File[]
+  organizedMeeting     Meeting[]            @relation("meetingOrganizer")
+  meetingParticipation MeetingParticipant[]
+  conversations        Conversation[]
+  messages             Message[]
+  membersOfChat        ConversationMembers[]
+  isActive             Boolean              @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("users")
+}
+
+model Workspace {
+  id          String            @id @default(uuid())
+  name        String
+  description String?
+  ownerId     String
+  owner       User              @relation("WorkspaceOwner", fields: [ownerId], references: [id])
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  members     WorkspaceMember[]
+  projects    Project[]
+  workeSpaceA Activity[]
+  files       File[]
+  meetings    Meeting[]
+
+  @@index([ownerId])
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id String @id @default(uuid())
+
+  workspaceId String
+  userId      String
+
+  role WorkspaceRole @default(MEMBER)
+
+  joinedAt DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([workspaceId, userId])
+  @@map("workspace_members")
+}
+
+model Project {
+  id String @id @default(uuid())
+
+  name        String
+  description String?
+
+  ownerId String
+  owner   User   @relation("ProjectOwner", fields: [ownerId], references: [id])
+
+  status ProjectStatus @default(ACTIVE)
+
+  startDate DateTime?
+  dueDate   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members ProjectMember[]
+  tasks   Task[]
+
+  workspaceId String
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+
+  projectAc Activity[]
+  files     File[]
+
+  meetings Meeting[]
+
+  @@index([workspaceId])
+  @@map("projects")
+}
+
+model ProjectMember {
+  id String @id @default(uuid())
+
+  projectId String
+  userId    String
+
+  role ProjectRole @default(MEMBER)
+
+  joinedAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([projectId, userId])
+  @@map("project_members")
+}
+
+model Task {
+  id          String       @id @default(uuid())
+  title       String
+  description String?
+  dueDate     DateTime?
+  status      TaskStatus   @default(TODO)
+  priority    TaskPriority @default(MEDIUM)
+  projectId   String
+  project     Project      @relation(fields: [projectId], references: [id])
+  creatorId   String
+  creator     User         @relation("TaskCreator", fields: [creatorId], references: [id])
+  assigneeId  String?
+  assignee    User?        @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  taskAct     Activity[]
+  comment     Comment[]
+  files       File[]
+
+  @@index([projectId])
+}
+
+model Notification {
+  id String @id @default(uuid())
+
+  recipientId String
+  recipient   User   @relation(fields: [recipientId], references: [id])
+
+  type NotificationType
+
+  title String
+
+  message String
+
+  isRead Boolean @default(false)
+
+  readAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  actionUrl String?
+
+  metadata Json?
+
+  @@map("notifications")
+}
+
+model Activity {
+  id          String             @id @default(uuid())
+  workspaceId String?
+  projectId   String?
+  taskId      String?
+  actorId     String?
+  action      ActivityAction
+  actor       User?              @relation(fields: [actorId], references: [id])
+  workSpace   Workspace?         @relation(fields: [workspaceId], references: [id])
+  task        Task?              @relation(fields: [taskId], references: [id])
+  project     Project?           @relation(fields: [projectId], references: [id])
+  targetType  ActivityTargetType
+  targetId    String
+  description String?
+  metadata    Json?
+  createdAt   DateTime           @default(now())
+}
+
+model Comment {
+  id      String @id @default(uuid())
+  content String
+
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id])
+
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  files     File[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([taskId])
+  @@index([authorId])
+  @@map("comments")
+}
+
+model File {
+  id String @id @default(uuid())
+
+  originalName String
+  storedName   String
+  mimeType     String
+  size         Int
+  storageKey   String
+
+  uploadedById String
+  uploadedBy   User   @relation(fields: [uploadedById], references: [id])
+
+  workspaceId String?
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id])
+
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id])
+
+  taskId String?
+  task   Task?   @relation(fields: [taskId], references: [id])
+
+  commentId String?
+  comment   Comment? @relation(fields: [commentId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([uploadedById])
+  @@index([workspaceId])
+  @@index([projectId])
+  @@index([taskId])
+  @@index([commentId])
+  @@map("files")
+}
+
+model Meeting {
+  id           String               @id @default(uuid())
+  title        String
+  description  String?
+  status       MeetingStatus        @default(SCHEDULED)
+  scheduledAt  DateTime
+  startedAt    DateTime?
+  endedAt      DateTime?
+  meetingUrl   String?
+  organizerId  String
+  organizer    User                 @relation("meetingOrganizer", fields: [organizerId], references: [id])
+  workSpaceId  String
+  workspace    Workspace            @relation(fields: [workSpaceId], references: [id])
+  projectId    String?
+  project      Project?             @relation(fields: [projectId], references: [id])
+  participants MeetingParticipant[]
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  @@index([workSpaceId])
+  @@index([projectId])
+  @@index([organizerId])
+  @@index([scheduledAt])
+  @@map("meetings")
+}
+
+model MeetingParticipant {
+  id        String @id @default(uuid())
+  meetingId String
+  userId    String
+
+  meeting   Meeting   @relation(fields: [meetingId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+  joinedAt  DateTime?
+  leftAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@unique([meetingId, userId])
+  @@map("meeting_participants")
+}
+model Conversation {
+  id           String               @id @default(uuid())
+  name         String?
+  type         ConversationType
+  createdById  String
+  createdBy    User                 @relation(fields: [createdById], references: [id])
+  participants ConversationMembers[]
+  messages     Message[]
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  @@map("conversations")
+}
+model ConversationMembers {
+  id             String       @id @default(uuid())
+  conversationId String
+  userId         String
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  user           User         @relation(fields: [userId], references: [id])
+  joinedAt       DateTime     @default(now())
+
+  @@unique([conversationId, userId])
+  @@map("conversation_members")
+}
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  senderId       String
+  content        String
+  sentAt         DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  sender         User         @relation(fields: [senderId], references: [id])
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@map("messages")
+}

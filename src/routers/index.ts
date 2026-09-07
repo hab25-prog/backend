@@ -1,0 +1,28 @@
+import { Router } from "express";
+
+import userRoutes from "../module/user/user.route.js";
+import projectRoter from "../module/project/project.route.js";
+import taskRouter from "../module/task/task.route.js";
+import workSpaceRoute from "../module/work_space/workSpace.route.js";
+import notificationRouter from "../module/Notification/notification.route.js";
+import activityRoute from "../module/activity/activity.route.js";
+import commentRouter from "../module/comment/comment.routes.js";
+import chatRouter from "../module/chat/chat.routes.js";
+import searchRouter from "../module/search/search.routes.js";
+import dashboardRouter from "../module/dashboard/dashboard.router.js";
+import fileRouter from "../module/file/file.routes.js";
+import meetingRouter from "../module/meeting/meeting.route.js";
+const routers = Router();
+routers.use("/user", userRoutes);
+routers.use("/project", projectRoter);
+routers.use("/task", taskRouter);
+routers.use("/workSpace", workSpaceRoute);
+routers.use("/notification", notificationRouter);
+routers.use("/activity", activityRoute);
+routers.use("/taskComment", commentRouter);
+routers.use("/chat", chatRouter);
+routers.use("/file", fileRouter);
+routers.use("/meeting", meetingRouter);
+routers.use("/search", searchRouter);
+routers.use("/dashboard", dashboardRouter);
+export default routers;
