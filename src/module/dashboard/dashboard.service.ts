@@ -3,7 +3,6 @@ import type { DashboardResponse } from "./dashboard.types.js";
 const dashboardRepo = new DashboardRepository();
 export class DashboardService {
   async getDashboard(userId: string): Promise<DashboardResponse> {
-    
     const [
       workspaceCount,
       projectStatistics,

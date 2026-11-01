@@ -11,7 +11,7 @@ import { NotificationService } from "../Notification/notification.service.js";
 import { UserRepository } from "../user/user.repository.js";
 import { WorkSpaceRepository } from "../work_space/workSpace.repository.js";
 import { ProjectRepository } from "./project.repository.js";
-import type { UpdateRole } from "./project.types.js";
+import type { AllProjects, UpdateRole } from "./project.types.js";
 
 const projectRepository = new ProjectRepository();
 const userRepository = new UserRepository();
@@ -72,7 +72,12 @@ export class ProjectService {
 
     return proj;
   }
+  async getAllProjects(userId: string) {
+    if (userId == "") throw new UnauthorizedError("first you must e logged in");
+    const projects = await projectRepository.findManyByUser(userId);
 
+    return projects as AllProjects[];
+  }
   async getProject(projectId: any, userId: any) {
     if (!projectId) {
       throw new ForbiddenError("project must be selected");

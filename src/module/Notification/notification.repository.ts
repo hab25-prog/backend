@@ -20,6 +20,13 @@ export class NotificationRepository {
   async findAllByRecipient(recipientId: string) {
     return prisma.notification.findMany({
       where: { recipientId },
+      select: {
+        id: true,
+        isRead: true,
+        message: true,
+        createdAt: true,
+        title: true,
+      },
       orderBy: { createdAt: "desc" },
     });
   }

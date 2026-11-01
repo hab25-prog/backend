@@ -17,6 +17,23 @@ export const createWorkSpace = async (
   );
   res.status(200).json({ status: true, data: data });
 };
+export const getAllWorkSpace = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
+  const userId = (await req.user?.id) || "";
+  const data = await workSpaceService.getAllWorkSpace(userId);
+  res.status(200).json({ status: true, data });
+};
+export const getWorkSpace = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
+  const userId = req.user?.id || "";
+  const workSpaceId = req.params.id;
+  const workSpace = await workSpaceService.getWorkSpace(userId, workSpaceId);
+  res.status(200).json({ status: true, data: workSpace });
+};
 export const addUser = async (req: AuthenticatedRequest, res: Response) => {
   const { workSpaceId, userId, role } = req.body;
   // this is debuging purpose

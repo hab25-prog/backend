@@ -4,7 +4,7 @@ import type {
   ProjectStatus,
 } from "../../../generated/prisma/enums.js";
 import { prisma } from "../../config/prisma.js";
-import type { UpdateRole } from "./project.types.js";
+import type { AllProjects, UpdateRole } from "./project.types.js";
 export class ProjectRepository {
   async getMember(userId: string, projectId: string) {
     return await prisma.projectMember.findUnique({
@@ -62,7 +62,38 @@ export class ProjectRepository {
   }
 
   async findManyByUser(id: string) {
-    return await prisma.project.findMany({ where: { ownerId: id } });
+    const data = await prisma.project.findMany({
+      where: {
+        members: {
+          some: {
+            userId: id,
+          },
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        updatedAt: true,
+        tasks: true,
+        _count: {
+          select: {
+            members: true,
+          },
+        },
+      },
+    });
+    const brandNew = data.map((p) => {
+      return {
+        ...p,
+        members: p._count.members,
+        tasks: {
+          done: p.tasks.filter((t) => t.status == "DONE").length,
+          notDone: p.tasks.filter((t) => t.status != "DONE").length,
+        },
+      };
+    });
+    return brandNew as AllProjects[];
   }
 
   async updateProject(

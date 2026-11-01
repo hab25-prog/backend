@@ -4,6 +4,7 @@ import {
   addNewMeber,
   deleteProject,
   getAllMember,
+  getAllProjects,
   getProjectById,
   newProject,
   removeMember,
@@ -14,6 +15,7 @@ import { asyncHandler } from "../../shared/util/AsyncHandler.js";
 const projectRoter = Router();
 
 projectRoter.post("/createNew", isLogin, asyncHandler(newProject));
+projectRoter.get("/getAll", isLogin, asyncHandler(getAllProjects));
 projectRoter.get("/getProject/:id", isLogin, asyncHandler(getProjectById));
 projectRoter.get(
   "/allProjectMember/:projectId",

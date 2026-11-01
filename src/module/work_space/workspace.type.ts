@@ -17,3 +17,11 @@ export type WorkSpaceMembers = [
     joinedAt: Date;
   },
 ];
+export type WorkSpace = {
+  name: string;
+  description: string | null;
+  members: number;
+  projects: number;
+  ownerName: string | undefined;
+  id: string;
+};

@@ -146,8 +146,20 @@ export class DashboardRepository {
     const data = await prisma.project.findMany({
       where: {
         members: {
-          every: {
+          some: {
             userId: userId,
+          },
+        },
+      },
+      include: {
+        _count: {
+          select: {
+            members: true,
+          },
+        },
+        tasks: {
+          select: {
+            status: true, // Fetch task statuses to calculate counts
           },
         },
       },
@@ -156,12 +168,32 @@ export class DashboardRepository {
       },
       take: 5,
     });
-    return data as DashboardProject[];
+    console.log(data);
+    // return [];
+
+    return data.map((d) => {
+      return {
+        id: d.id,
+        name: d.name,
+        status: d.status,
+        updatedAt: d.updatedAt,
+        memberCount: d._count.members,
+        description: d.description,
+        task: d.tasks,
+      };
+    }) as DashboardProject[];
   }
   async getRecentActivity(userId: string): Promise<DashboardActivity[]> {
     const data = await prisma.activity.findMany({
       where: {
-        actorId: userId,
+        // actorId: userId,
+      },
+      select: {
+        id: true,
+        action: true,
+        description: true,
+        actorId: true,
+        createdAt: true,
       },
       take: 10,
     });

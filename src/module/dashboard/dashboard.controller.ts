@@ -8,5 +8,5 @@ export const getDashboard = async (
 ) => {
   const userId = req.user?.id;
   const data = await dashboardService.getDashboard(userId as string);
-  res.status(201).json({ status: true, data: data });
+  res.status(201).json({ status: true,  data });
 };

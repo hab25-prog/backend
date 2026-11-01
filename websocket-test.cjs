@@ -1,7 +1,7 @@
 const WebSocket = require("ws");
 
 const jwt =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImU0MjE1MDc1LWFkMGQtNDYzMy1hZWE2LTU1NGYwMDAxNmFjYSIsInVzZXJOYW1lIjoiaHViMjEyOCIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzg4NzIxNDU5LCJleHAiOjE3ODg4MDc4NTl9.sHHke2hOYb-D_PQXEzthfj-EQw64d6HoMBAkVSU4HHc";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImU0MjE1MDc1LWFkMGQtNDYzMy1hZWE2LTU1NGYwMDAxNmFjYSIsInVzZXJOYW1lIjoiaHViMjEyOCIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzkxMzU3MjI3LCJleHAiOjE3OTE0NDM2Mjd9.h_vxzcMQpxgJR7U3Djv9l5a3Zv1fzSqUexAhOWj_cBY";
 
 const conversationId = "YOUR_CONVERSATION_ID";
 
@@ -28,6 +28,7 @@ ws.on("open", () => {
 ws.on("message", (data) => {
   console.log("📩 Server:", data.toString());
 });
+// ws.send("hi it is my second message");
 
 ws.on("close", () => {
   console.log("❌ WebSocket closed");

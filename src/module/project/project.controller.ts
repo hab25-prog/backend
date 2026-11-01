@@ -19,6 +19,14 @@ export const newProject = async (req: AuthenticatedRequest, res: Response) => {
 
   res.status(200).json({ satus: true, data: proj });
 };
+export const getAllProjects = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
+  const userId = req.user?.id;
+  const projects = await projectService.getAllProjects(userId || "");
+  res.status(200).json({ status: true, data: projects });
+};
 export const getProjectById = async (
   req: AuthenticatedRequest,
   res: Response,
@@ -61,14 +69,9 @@ export const getAllMember = async (
 };
 export const updateRole = async (req: AuthenticatedRequest, res: Response) => {
   const id = req.user?.id;
-  const userId= req.params.userId
+  const userId = req.params.userId;
   const { projectId, role } = req.body;
-  const data = await projectService.updateRole(
-    id,
-    projectId,
-    userId,
-    role,
-  );
+  const data = await projectService.updateRole(id, projectId, userId, role);
   res.status(200).json({ status: true, data: data });
 };
 export const removeMember = async (

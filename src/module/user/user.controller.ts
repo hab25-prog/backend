@@ -72,5 +72,6 @@ export const logOut = async (req: Request, res: Response) => {
     httpOnly: true,
     sameSite: "strict",
   });
+  console.log("the user is logged out");
   res.status(200).json({ status: "ok", message: "sucessfully logout" });
 };

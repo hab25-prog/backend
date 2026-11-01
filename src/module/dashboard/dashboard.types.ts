@@ -1,3 +1,4 @@
+import type { Task } from "../../../generated/prisma/client.js";
 import type {
   NotificationType,
   ProjectStatus,
@@ -31,6 +32,9 @@ export interface DashboardProject {
   name: string;
   status: ProjectStatus;
   updatedAt: Date;
+  memberCount: number;
+  description: string;
+  task: Task[];
 }
 export interface DashboardTask {
   id: string;

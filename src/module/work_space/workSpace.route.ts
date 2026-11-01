@@ -4,7 +4,9 @@ import { asyncHandler } from "../../shared/util/AsyncHandler.js";
 import {
   addUser,
   createWorkSpace,
+  getAllWorkSpace,
   getMembers,
+  getWorkSpace,
   removeUser,
   updateRole,
 } from "./workSpace.controller.js";
@@ -12,7 +14,8 @@ import {
 const workSpaceRoute = Router();
 
 workSpaceRoute.post("/addWorkSpace", isLogin, asyncHandler(createWorkSpace));
-workSpaceRoute.get("/allWorkSpace", isLogin);
+workSpaceRoute.get("/detail/:id", isLogin, asyncHandler(getWorkSpace));
+workSpaceRoute.get("/allWorkSpace", isLogin, asyncHandler(getAllWorkSpace));
 workSpaceRoute.get("/getAllUser", isLogin, asyncHandler(getMembers));
 workSpaceRoute.patch("/addUser", isLogin, asyncHandler(addUser));
 workSpaceRoute.patch("/removeUser", isLogin, asyncHandler(removeUser));

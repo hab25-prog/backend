@@ -5,7 +5,7 @@ import { NoteFoundError } from "../../shared/errors/NotFoundError.js";
 import { WorkSpaceRepository } from "./workSpace.repository.js";
 import { NotificationService } from "../Notification/notification.service.js";
 import { UnauthorizedError } from "../../shared/errors/UnauthorizedError.js";
-import type { UpdateMemberRole } from "./workspace.type.js";
+import type { UpdateMemberRole, WorkSpace } from "./workspace.type.js";
 import { AppError } from "../../shared/errors/AppError.js";
 import type { CreateNotificationInput } from "../Notification/notification.types.js";
 
@@ -36,6 +36,26 @@ export class WorkSpaceService {
     }
 
     return workS;
+  }
+  async getAllWorkSpace(userId: string) {
+    if (userId == "") throw new UnauthorizedError("first you must logged in");
+    const data = await workSpaceRepository.getAllWorkSpace(userId);
+    return data as WorkSpace[];
+  }
+  async getWorkSpace(userId: string, workSpaceId: any) {
+    if (userId == "") throw new UnauthorizedError("you must logged in first");
+    if (workSpaceId == "")
+      throw new NoteFoundError("you should be select the workSpace");
+    console.log("debug : ", workSpaceId, userId);
+    const member = await workSpaceRepository.getWorkSpaceMember(
+      userId,
+      workSpaceId,
+    );
+    console.log("the membership : ", member);
+    if (!member)
+      throw new UnauthorizedError("you are not the member of this work space");
+    const workspace = await workSpaceRepository.getWorkSpaceById(workSpaceId);
+    return workspace;
   }
   async addUser(
     ownerId: string,
